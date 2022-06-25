@@ -3,4 +3,64 @@
 
 \begin{document}
 \section{Liaisons série}
+\subsection{Types de liens}
+\begin{itemize}
+\item Bus parallèle, un byte par coup d'horloge
+\begin{itemize}
+\item Fréquence limitée
+\item Nombre de liens (encombrement)
+\end{itemize}
+\item Série asynchrone (UART, CAN)
+\begin{itemize}
+\item Trame
+\item Débits limités
+\item Signal de start
+\item Le récepteur utilise sa propre horloge
+\end{itemize}
+\item Série synchrone (HDMI, PCIe, USB, Ethernet)
+\begin{itemize}
+\item Débits élevés
+\item Signal d'horloge sur une ligne séparée ou sur la même ligne (préambule)
+\item Le récepteur se synchronise avec l'horloge de l'émetteur
+\end{itemize}
+\end{itemize}
+\subsection{Encodage de l'horloge}
+\subsubsection{8b10b ou 64b66b}
+\begin{itemize}
+\item But de moyenner le nombre de 0 et de 1 sur la ligne (moyenne nulle)
+\item Pas de mots "0000000000" et "1111111111"
+\item Récupération du signal d'horloge avec les transitions supplémentaires.
+\item 12 caractères "K" qui permettent de contrôler le flux.
+\end{itemize}
+\subsubsection{Vitesse de transmission / réception}
+Émetteur plus lent que le récepteur : le récepteur doit attendre.\\
+Émetteur plus rapide que le récepteur : le récepteur rempli son buffer
+\paragraph{Solution} : Utiliser un "elastic buffer" et mettre en place une méthode de communication entre les deux parties pour éviter de perdre des données.
+\paragraph{Deuxième solution} : CC (Clock Compensation). Lorsque le récepteur tombe sur un CC, il attend quelques cycles d'horloge (lorsque l'émetteur est plus lent que le récepteur). Si l'émetteur est plus rapide que le récepteur, le récepteur va recevoir plusieurs CC et va sauter du nombre de CC introduits dans le flux. Ceci au pointeur de lecture de se retrouver en face du pointeur d'écriture.
+
+\subsection{GTP}
+\begin{itemize}
+\item Encodage 8b10b
+\item 10 bits à \SI{125}{\mega\hertz}
+\item 1 bit à \SI{2.5}{\giga\hertz} (DDR)
+\item Buffer élastique sur le récepteur
+\item FIFO de compensation sur l'émetteur (au cas où les deux domaines d'horloge ne sont pas parfaitement synchronisés)
+\end{itemize}
+Un décalage volontaire permet de garantir que les buffer ne débordent jamais
+\begin{itemize}
+\item Le domaine d'horloge (DH) utilisateur de l'émetteur est légèrement plus faible que le DH de transmission
+\item le DH de l'émetteur est le même que le DH du récepteur (partie transmission)
+\item le DH de transmission du récepteur est légèrement plus lent que le DH utilisation du récepteur
+\end{itemize}
+
+3 configurations :
+\begin{itemize}
+\item Configuration commune
+\item Configuration faible latence
+\item Configuration Aurora
+\end{itemize}
+
+
+
+
 \end{document}
